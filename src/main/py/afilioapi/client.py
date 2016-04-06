@@ -21,7 +21,7 @@ class AfilioSalesAPI():
         self.affiliate_id = affiliate_id
         self.url_base = "http://v2.afilio.com.br/api/leadsale_api.php"
 
-    def _build_params(self, report_type):
+    def _build_params(self, report_type, date_start, date_end):
         if not report_type in [AfilioSalesAPI.LEADS, AfilioSalesAPI.SALES]:
             raise ValueError("Use one of valid report type: AfilioSalesAPI.LEADS (lead) or AfilioSalesAPI.SALES (sale)")
 
@@ -30,18 +30,18 @@ class AfilioSalesAPI():
                       token=self.token,
                       affid=self.affiliate_id,
                       type=report_type,
-                      dateStart="2016-03-01",
-                      dateEnd="2016-03-31",
+                      dateStart=date_start,
+                      dateEnd=date_end,
                       )
         return params
 
-    def _load(self, report_type):
-        params = self._build_params(report_type)
+    def _load(self, report_type, date_start, date_end):
+        params = self._build_params(report_type, date_start, date_end)
         report = requests.get(self.url_base, params=params)
         return report.json()
 
-    def sales(self):
-        self._load(report_type=AfilioSalesAPI.SALES)
+    def sales(self, date_start, date_end):
+        sales = self._load(report_type=AfilioSalesAPI.SALES)
         pass
 
     def leads(self):
@@ -53,20 +53,20 @@ import unittest
 
 class AfilioSalesAPITestCase(unittest.TestCase):
     def test_invalid_params(self):
-        self.assertRaises(ValueError, AfilioSalesAPI(None, None)._build_params, report_type=None)
-        self.assertRaises(ValueError, AfilioSalesAPI(None, None)._build_params, report_type="a")
+        self.assertRaises(ValueError, AfilioSalesAPI(None, None)._build_params, report_type=None, date_start=None, date_end=None)
+        self.assertRaises(ValueError, AfilioSalesAPI(None, None)._build_params, report_type="a", date_start=None, date_end=None)
 
     def test_lead_request_params(self):
         api = AfilioSalesAPI("token", "affid")
         base_params = dict(affid=api.affiliate_id, token=api.token, format="json", mode="list")
 
-        startDate = "2016-03-01"
-        endDate = "2016-03-31"
+        date_start = "2016-03-01"
+        date_end = "2016-03-31"
 
         expected = {}
         expected.update(base_params)
         expected["type"] = AfilioSalesAPI.LEADS
-        expected["dateStart"] = startDate
-        expected["dateEnd"] = endDate
+        expected["dateStart"] = date_start
+        expected["dateEnd"] = date_end
         self.assertCountEqual(expected,
-                              api._build_params(report_type=AfilioSalesAPI.LEADS))
+                              api._build_params(report_type=AfilioSalesAPI.LEADS, date_start=date_start, date_end=date_end))
