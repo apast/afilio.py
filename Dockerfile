@@ -2,5 +2,6 @@ FROM python:3
 
 ENTRYPOINT bash
 
-COPY requirements.pip /tmp/requirements.pip
-RUN pip install /tmp/requirements.pip
+ENV VENV_REQUIREMENTS "/tmp/requirements.pip"
+COPY requirements.pip $VENV_REQUIREMENTS
+RUN pip install --upgrade -r $VENV_REQUIREMENTS
