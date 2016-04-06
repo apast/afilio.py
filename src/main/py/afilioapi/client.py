@@ -1,4 +1,5 @@
 import requests
+import json
 
 
 class AfilioSalesAPI():
@@ -40,15 +41,75 @@ class AfilioSalesAPI():
         report = requests.get(self.url_base, params=params)
         return report.json()
 
-    def sales(self, date_start, date_end):
-        sales = self._load(report_type=AfilioSalesAPI.SALES)
-        pass
+    def get_report(self, report_type, date_start, date_end):
+        return self._load(report_type, date_start, date_end)
 
-    def leads(self):
-        self._load(report_type=AfilioSalesAPI.LEADS)
+
+class DateFormat():
+    def __call__(self, value):
+        import re
+        format_rex = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
+        date_parts = format_rex.findall(value)
+
+        if not date_parts:
+            raise ValueError("Invalid date format. Expected format is YYYY-MM-DD")
+
+        year, month, day = date_parts[0]
+        if int(month) > 12:
+            raise ValueError("Invalid month")
+
+        if int(day) > 31:
+            raise ValueError("Invalid day")
+
+        return value
+
+
+class AfilioSalesCLI():
+    def run(self, input_data):
+        args = self.fetch(input_data)
+
+        credentials = json.load(args.credentials)
+
+        api = AfilioSalesAPI(affiliate_id=credentials["affiliate_id"],
+                             token=credentials["token"])
+        report = api.get_report(report_type=args.report_type,
+                                date_start=args.date_start,
+                                date_end=args.date_end,
+                                )
+        print(report)
+
+    def fetch(self, input_data):
+        import argparse
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-t", "--type", dest="report_type", choices=["sale", "lead"], required=True)
+        parser.add_argument("-e", "--end", dest="date_end", type=DateFormat(), help="Format: YYYY-MM-DD", required=True)
+        parser.add_argument("-s", "--start", dest="date_start", type=DateFormat(), help="Format: YYYY-MM-DD", required=True)
+        parser.add_argument("-c", "--credentials", dest="credentials", type=argparse.FileType("r"), help='JSON file containing credentials token and Affiliate ID. format: {"token": <api_token>, "affiliate_id": <affiliate_id>}', required=True)
+
+        return parser.parse_args(input_data)
+
+
+if __name__ == "__main__":
+    import sys
+    AfilioSalesCLI().run(sys.argv[1:])
 
 
 import unittest
+
+
+class DateFormatTestCase(unittest.TestCase):
+    def test_call_incomplete(self):
+        self.assertRaise(ValueError, DateFormat().__call__, "2019-13-01")
+        self.assertRaise(ValueError, DateFormat().__call__, "2019-11-32")
+
+    def test_call_incomplete(self):
+        self.assertRaises(ValueError, DateFormat().__call__, "")
+        self.assertRaises(ValueError, DateFormat().__call__, "2019")
+        self.assertRaises(ValueError, DateFormat().__call__, "2019-10")
+        self.assertRaises(ValueError, DateFormat().__call__, "2019-10-1")
+
+    def test_call_valid(self):
+        self.assertEqual("2019-10-11", DateFormat()("2019-10-11"))
 
 
 class AfilioSalesAPITestCase(unittest.TestCase):
