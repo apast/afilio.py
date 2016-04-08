@@ -7,7 +7,8 @@ setup(name='Afilio API Client',
             description='Afilio API Client & Bindings',
             author='Andre Pastore',
             author_email='andrepgs@gmail.com',
-            url='https://www.afilio.com.br',
+            url='https://github.com/apast/afilio.py',
+            download_url='https://github.com/apast/afilio.py/tarball/0.1',
             packages=['afilioapi'],
             package_dir= {'': 'src/main/py/'}
            )
