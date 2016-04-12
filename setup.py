@@ -2,9 +2,10 @@
 
 from setuptools import setup
 
-setup(name='Afilio API Client',
-            version='0.1',
+setup(name='afilio.py',
+            version='0.1.1',
             description='Afilio API Client & Bindings',
+            keywords="afilio.py is an afilio api client & bindings for accessing Sales & Leads API",
             author='Andre Pastore',
             author_email='andrepgs@gmail.com',
             url='https://github.com/apast/afilio.py',
