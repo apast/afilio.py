@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='afilio.py',
-            version='0.1.1',
+            version='0.1.2',
             description='Afilio API Client & Bindings',
             keywords="afilio.py is an afilio api client & bindings for accessing Sales & Leads API",
             author='Andre Pastore',
